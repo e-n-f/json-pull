@@ -5,7 +5,9 @@
 #include <stdarg.h>
 #include "jsonpull.h"
 
-json_pull *json_begin(int (*read)(struct json_pull *), int (*peek)(struct json_pull *), void *source) {
+#define BUFFER 10000
+
+json_pull *json_begin(int (*read)(struct json_pull *, char *buffer, int n), void *source) {
 	json_pull *j = malloc(sizeof(json_pull));
 
 	j->error = NULL;
@@ -14,26 +16,49 @@ json_pull *json_begin(int (*read)(struct json_pull *), int (*peek)(struct json_p
 	j->root = NULL;
 
 	j->read = read;
-	j->peek = peek;
 	j->source = source;
+	j->buffer = malloc(BUFFER);
+	j->buffer_head = 0;
+	j->buffer_tail = 0;
 
 	return j;
 }
 
-static int read_file(json_pull *j) {
-	return fgetc(j->source);
+static inline int peek(json_pull *j) {
+	if (j->buffer_head < j->buffer_tail) {
+		return j->buffer[j->buffer_head];
+	} else {
+		j->buffer_head = 0;
+		j->buffer_tail = j->read(j, j->buffer, BUFFER);
+		if (j->buffer_head >= j->buffer_tail) {
+			return EOF;
+		}
+		return j->buffer[j->buffer_head];
+	}
 }
 
-static int peek_file(json_pull *j) {
-	int c = getc(j->source);
-	ungetc(c, j->source);
-	return c;
+static inline int next(json_pull *j) {
+	if (j->buffer_head < j->buffer_tail) {
+		return j->buffer[j->buffer_head++];
+	} else {
+		j->buffer_head = 0;
+		j->buffer_tail = j->read(j, j->buffer, BUFFER);
+		if (j->buffer_head >= j->buffer_tail) {
+			return EOF;
+		}
+		return j->buffer[j->buffer_head++];
+	}
+}
+
+static int read_file(json_pull *j, char *buffer, int n) {
+	return fread(buffer, 1, n, j->source);
 }
 
 json_pull *json_begin_file(FILE *f) {
-	return json_begin(read_file, peek_file, f);
+	return json_begin(read_file, f);
 }
 
+#if 0
 static int read_string(json_pull *j) {
 	char *cp = j->source;
 	if (*cp == '\0') {
@@ -55,13 +80,15 @@ static int peek_string(json_pull *p) {
 json_pull *json_begin_string(char *s) {
 	return json_begin(read_string, peek_string, s);
 }
+#endif
 
 void json_end(json_pull *p) {
+	free(p->buffer);
 	free(p);
 }
 
-static int read_wrap(json_pull *j) {
-	int c = j->read(j);
+static inline int read_wrap(json_pull *j) {
+	int c = next(j);
 
 	if (c == '\n') {
 		j->line++;
@@ -134,7 +161,7 @@ static json_object *add_object(json_pull *j, json_type type) {
 	return o;
 }
 
-json_object *json_hash_get(json_object *o, char *s) {
+json_object *json_hash_get(json_object *o, const char *s) {
 	if (o == NULL || o->type != JSON_HASH) {
 		return NULL;
 	}
@@ -372,34 +399,34 @@ again:
 			string_append(&val, c);
 		} else if (c >= '1' && c <= '9') {
 			string_append(&val, c);
-			c = j->peek(j);
+			c = peek(j);
 
 			while (c >= '0' && c <= '9') {
 				string_append(&val, read_wrap(j));
-				c = j->peek(j);
+				c = peek(j);
 			}
 		}
 
-		if (j->peek(j) == '.') {
+		if (peek(j) == '.') {
 			string_append(&val, read_wrap(j));
 
-			c = j->peek(j);
+			c = peek(j);
 			while (c >= '0' && c <= '9') {
 				string_append(&val, read_wrap(j));
-				c = j->peek(j);
+				c = peek(j);
 			}
 		}
 
-		c = j->peek(j);
+		c = peek(j);
 		if (c == 'e' || c == 'E') {
 			string_append(&val, read_wrap(j));
 
-			c = j->peek(j);
+			c = peek(j);
 			if (c == '+' || c == '-') {
 				string_append(&val, read_wrap(j));
 			}
 
-			c = j->peek(j);
+			c = peek(j);
 			if (c < '0' || c > '9') {
 				j->error = "Exponent without digits";
 				string_free(&val);
@@ -407,7 +434,7 @@ again:
 			}
 			while (c >= '0' && c <= '9') {
 				string_append(&val, read_wrap(j));
-				c = j->peek(j);
+				c = peek(j);
 			}
 		}
 

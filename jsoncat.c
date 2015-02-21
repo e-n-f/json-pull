@@ -179,13 +179,51 @@ void process_tree(FILE *f, char *fname) {
 	json_end(jp);
 }
 
+void process_string(FILE *f, char *fname) {
+	char *buf = NULL;
+	int alloc = 0;
+	int len = 0;
+	int c;
+
+	while ((c = getc(f)) != EOF) {
+		if (len + 1 >= alloc) {
+			alloc = (len + 100) * 2;
+			buf = realloc(buf, alloc);
+		}
+
+		buf[len] = c;
+		buf[len + 1] = '\0';
+		len++;
+	}
+
+	json_pull *jp = json_begin_string(buf);
+	json_object *j;
+
+	while ((j = json_read(jp)) != NULL) {
+		if (j->parent == NULL) {
+			json_print(j, 0);
+			json_free(j);
+			printf("\n");
+		}
+	}
+
+	if (jp->error != NULL) {
+		fflush(stdout);
+		fprintf(stderr, "%s: %d: %s\n", fname, jp->line, jp->error);
+		json_free(jp->root);
+	}
+
+	json_end(jp);
+	free(buf);
+}
+
 int main(int argc, char **argv) {
 	extern int optind;
 	int i;
 
 	void (*func)(FILE *, char *) = process_callback;
 
-	while ((i = getopt(argc, argv, "ti")) != -1) {
+	while ((i = getopt(argc, argv, "tis")) != -1) {
 		switch (i) {
 		case 't':
 			func = process_tree;
@@ -193,6 +231,10 @@ int main(int argc, char **argv) {
 
 		case 'i':
 			func = process_incremental;
+			break;
+
+		case 's':
+			func = process_string;
 			break;
 
 		default:
@@ -211,6 +253,7 @@ int main(int argc, char **argv) {
 				perror(argv[i]);
 				exit(EXIT_FAILURE);
 			}
+
 			func(f, argv[i]);
 			fclose(f);
 		}

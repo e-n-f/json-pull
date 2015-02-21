@@ -132,8 +132,8 @@ The <code>jsoncat</code> program reads JSON from the standard input or from
 named files and pretty-prints it to the standard output.
 
 Normally it uses the callback interface to avoid memory overhead.
-It has three options:
+It has three options to exercise different aspects of the library:
 
 * <code>-t</code> reads the whole tree and then prints it.
 * <code>-i</code> reads incrementally, but still keeps it all in memory.
-* <code>-s</code> reads the file into a string before parsing it incrementally.
+* <code>-s</code> reads the file into a string before parsing it with callbacks.

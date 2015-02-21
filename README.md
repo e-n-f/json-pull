@@ -19,8 +19,8 @@ by calling <code>json_begin_file()</code> to begin reading from a file
 or <code>json_begin_string()</code> to begin reading from a string.
 
 You can also read from anything you want by calling <code>json_begin()</code>
-with your own <code>read()</code> and <code>peek()</code> functions that
-return or preview, respectively, the next UTF-8 byte from your input stream.
+with your own <code>read()</code> function that copies UTF-8 bytes
+from your input stream.
 
 Reading full JSON trees 
 -----------------------
@@ -132,7 +132,8 @@ The <code>jsoncat</code> program reads JSON from the standard input or from
 named files and pretty-prints it to the standard output.
 
 Normally it uses the callback interface to avoid memory overhead.
-It has two options:
+It has three options:
 
-* <code>-t</code> reads the whole tree and then prints it
+* <code>-t</code> reads the whole tree and then prints it.
 * <code>-i</code> reads incrementally, but still keeps it all in memory.
+* <code>-s</code> reads the file into a string before parsing it incrementally.

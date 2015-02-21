@@ -112,8 +112,7 @@ void callback(json_type type, json_pull *jp, void *state) {
 	}
 }
 
-void process_callback(FILE *f, char *fname) {
-	json_pull *jp = json_begin_file(f);
+void process_callback1(json_pull *jp, char *fname) {
 	json_object *j;
 	int level = 0;
 
@@ -133,6 +132,11 @@ void process_callback(FILE *f, char *fname) {
 	}
 
 	json_end(jp);
+}
+
+void process_callback(FILE *f, char *fname) {
+	json_pull *jp = json_begin_file(f);
+	process_callback1(jp, fname);
 }
 
 void process_incremental(FILE *f, char *fname) {
@@ -197,23 +201,7 @@ void process_string(FILE *f, char *fname) {
 	}
 
 	json_pull *jp = json_begin_string(buf);
-	json_object *j;
-
-	while ((j = json_read(jp)) != NULL) {
-		if (j->parent == NULL) {
-			json_print(j, 0);
-			json_free(j);
-			printf("\n");
-		}
-	}
-
-	if (jp->error != NULL) {
-		fflush(stdout);
-		fprintf(stderr, "%s: %d: %s\n", fname, jp->line, jp->error);
-		json_free(jp->root);
-	}
-
-	json_end(jp);
+	process_callback1(jp, fname);
 	free(buf);
 }
 

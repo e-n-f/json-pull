@@ -247,7 +247,7 @@ again:
 		}
 
 		if (j->container->expect != JSON_COMMA) {
-			if (! (j->container->expect == JSON_ITEM && j->container->length == 0)) {
+			if (!(j->container->expect == JSON_ITEM && j->container->length == 0)) {
 				j->error = "Found ] without final element";
 				return NULL;
 			}
@@ -285,7 +285,7 @@ again:
 		}
 
 		if (j->container->expect != JSON_COMMA) {
-			if (! (j->container->expect == JSON_KEY && j->container->length == 0)) {
+			if (!(j->container->expect == JSON_KEY && j->container->length == 0)) {
 				j->error = "Found } without final element";
 				return NULL;
 			}

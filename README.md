@@ -34,6 +34,9 @@ from the same stream. This is not standard JSON, but is useful for something lik
 the Twitter filter stream that contains a series of JSON objects separated by
 newlines, without a wrapper array that contains them all.
 
+In addition, extra commas at the top level are no longer flagged as an error,
+so a series of comma-separated items can be read without their container array.
+
 Reading JSON streams
 --------------------
 
@@ -56,6 +59,11 @@ or wait until the end and call <code>json_free()</code> on the outer object
 which will recursively free everything that it contains. Freeing an object before
 its container is complete also removes it from its parent array or hash so that
 there are not dangling references left to it.
+
+If you want to keep an individual JSON object around for later processing
+while allowing its parents and siblings to be freed, <code>json_disconnect()</code>
+will detach an object from its container. You should call <code>json_free()</code>
+later to free the detached object once you are finished with it.
 
 Reading JSON streams with callbacks
 -----------------------------------
@@ -121,9 +129,13 @@ The <code>root</code> field points to the outer object of the current parse tree
 Utility function
 ----------------
 
-There is a function <code>json_hash_get</code> that looks up the JSON object hash value
+There is a function <code>json_hash_get()</code> that looks up the JSON object hash value
 corresponding to a C string hash key in a JSON hash object. If the object specified is
 NULL or not a JSON hash or has no matching key, it returns NULL.
+
+Another function <code>json_stringify()</code> converts a JSON parse tree back to its
+string representation. The caller is responsible for calling <code>free()</code> on the
+return value once it is no longer needed.
 
 Test program
 ------------

@@ -118,11 +118,12 @@ void process_callback1(json_pull *jp, char *fname) {
 
 	while ((j = json_read_separators(jp, callback, &level)) != NULL) {
 		json_print_one(j, &level);
-		json_free(j);
 
 		if (j->parent == NULL) {
 			printf("\n");
 		}
+
+		json_free(j);
 	}
 
 	if (jp->error != NULL) {

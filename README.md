@@ -32,7 +32,9 @@ Call <code>json_free()</code> on the object when you are done with it.
 You can continue calling <code>json_read_tree()</code> to read additional objects
 from the same stream. This is not standard JSON, but is useful for something like
 the Twitter filter stream that contains a series of JSON objects separated by
-newlines, without a wrapper array that contains them all.
+newlines, without a wrapper array that contains them all. (The previous parse tree
+will automatically have `json_free()` called on it to prevent memory leaks, unless
+you have called `json_disconnect()` to disconnect it from the parser.)
 
 In addition, extra commas at the top level are no longer flagged as an error,
 so a series of comma-separated items can be read without their container array.

@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include "jsonpull.h"
 
+int fail = EXIT_SUCCESS;
+
 static void indent(int depth) {
 	int i;
 	for (i = 0; i < depth; i++) {
@@ -130,6 +132,7 @@ void process_callback1(json_pull *jp, char *fname) {
 		fflush(stdout);
 		fprintf(stderr, "%s: %d: %s\n", fname, jp->line, jp->error);
 		json_free(jp->root);
+		fail = EXIT_FAILURE;
 	}
 
 	json_end(jp);
@@ -156,6 +159,7 @@ void process_incremental(FILE *f, char *fname) {
 		fflush(stdout);
 		fprintf(stderr, "%s: %d: %s\n", fname, jp->line, jp->error);
 		json_free(jp->root);
+		fail = EXIT_FAILURE;
 	}
 
 	json_end(jp);
@@ -171,6 +175,7 @@ void process_tree(FILE *f, char *fname) {
 			if (jp->error != NULL) {
 				fprintf(stderr, "%s: %d: %s\n", fname, jp->line, jp->error);
 				json_free(jp->root);
+				fail = EXIT_FAILURE;
 			}
 
 			break;
@@ -248,5 +253,5 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	return 0;
+	return fail;
 }

@@ -2,9 +2,10 @@ PREFIX=/usr/local
 
 all: jsoncat libjsonpull.a
 
-install: jsonpull.h libjsonpull.a
+install: jsonpull.h libjsonpull.a jsoncat
 	cp jsonpull.h $(PREFIX)/include/jsonpull.h
 	cp libjsonpull.a $(PREFIX)/lib/libjsonpull.a
+	cp jsoncat $(PREFIX)/bin/jsoncat
 
 jsoncat: jsoncat.o jsonpull.o
 	cc -g -Wall -o $@ $^

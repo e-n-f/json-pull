@@ -151,3 +151,11 @@ It has three options to exercise different aspects of the library:
 * <code>-t</code> reads the whole tree and then prints it.
 * <code>-i</code> reads incrementally, but still keeps it all in memory.
 * <code>-s</code> reads the file into a string before parsing it with callbacks.
+
+GeoJSON feature extraction
+--------------------------
+
+The `geojson2nd` program reads JSON from the standard input input or from named files
+and outputs each object where `object.type === "Feature'` to the standard output on
+a separate line. The resulting stream can then conveniently be used as input to
+the [ndjson-cli](https://github.com/mbostock/ndjson-cli) tools.

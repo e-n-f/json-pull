@@ -1,17 +1,13 @@
 PREFIX=/usr/local
 
-all: jsoncat geojson2nd libjsonpull.a
+all: jsoncat libjsonpull.a
 
-install: jsonpull.h libjsonpull.a jsoncat geojson2nd
+install: jsonpull.h libjsonpull.a jsoncat
 	cp jsonpull.h $(PREFIX)/include/jsonpull.h
 	cp libjsonpull.a $(PREFIX)/lib/libjsonpull.a
 	cp jsoncat $(PREFIX)/bin/jsoncat
-	cp geojson2nd $(PREFIX)/bin/geojson2nd
 
 jsoncat: jsoncat.o jsonpull.o
-	cc -g -Wall -o $@ $^
-
-geojson2nd: geojson2nd.o jsonpull.o
 	cc -g -Wall -o $@ $^
 
 jsoncat.o jsonpull.o: jsonpull.h

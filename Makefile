@@ -7,8 +7,11 @@ install: jsonpull.h libjsonpull.a jsoncat
 	cp libjsonpull.a $(PREFIX)/lib/libjsonpull.a
 	cp jsoncat $(PREFIX)/bin/jsoncat
 
+clean:
+	rm -f *.o jsoncat libjsonpull.a
+
 jsoncat: jsoncat.o jsonpull.o
-	cc -g -Wall -o $@ $^
+	cc -O3 -g -Wall -o $@ $^
 
 jsoncat.o jsonpull.o: jsonpull.h
 
@@ -17,7 +20,7 @@ libjsonpull.a: jsonpull.o
 	ranlib $@
 
 %.o: %.c
-	cc -g -Wall -c $<
+	cc -O3 -g -Wall -c $<
 
 H = $(wildcard *.h) $(wildcard *.hpp)
 C = $(wildcard *.c) $(wildcard *.cpp)

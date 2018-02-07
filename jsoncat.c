@@ -15,7 +15,7 @@ static void indent(int depth) {
 	}
 }
 
-void json_print_one(json_object *j, int *depth) {
+static void json_print_one(json_object *j, int *depth) {
 	if (j == NULL) {
 		printf("NULL");
 	} else if (j->type == JSON_STRING) {
@@ -34,7 +34,7 @@ void json_print_one(json_object *j, int *depth) {
 
 		printf("\"");
 	} else if (j->type == JSON_NUMBER) {
-		printf("%f", j->number);
+		printf("%s", j->string);
 	} else if (j->type == JSON_NULL) {
 		printf("null");
 	} else if (j->type == JSON_TRUE) {
@@ -54,7 +54,7 @@ void json_print_one(json_object *j, int *depth) {
 	}
 }
 
-void json_print(json_object *j, int depth) {
+static void json_print(json_object *j, int depth) {
 	if (j == NULL) {
 		// Hash value in incompletely read hash
 		printf("NULL");
